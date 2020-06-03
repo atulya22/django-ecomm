@@ -7,6 +7,7 @@ from django.contrib import messages
 class HomeView(ListView):
     model = Item
     template_name = 'ecomm/home-page.html'
+    paginate_by = 10
     context_object_name = "items"
 
 def checkout_view(request):
