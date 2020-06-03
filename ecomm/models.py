@@ -36,6 +36,11 @@ class Item(models.Model):
             'slug': self.slug
         })
 
+    def get_remove_from_cart_url(self):
+        return reverse("ecomm:remove-from-cart", kwargs={
+            'slug': self.slug
+        })
+
 
 
     def __str__(self):
