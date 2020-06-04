@@ -6,6 +6,9 @@ from django.views.generic import ListView, DetailView, View
 from .models import  Item, Order, OrderItem
 from django.utils import timezone
 from django.contrib import messages
+from .forms import CheckoutForm
+from .models import BillingAddress
+
 
 class HomeView(ListView):
     model = Item
@@ -27,15 +30,57 @@ class OrderSummaryView(LoginRequiredMixin, View):
             return redirect('/')
         return render(self.request, 'ecomm/order-summary.html', context)
 
-def checkout_view(request):
-    return render(request, "ecomm/checkout-page.html")
+
+class CheckoutView(View):
+
+    def get(self, *args, **kwargs):
+        form = CheckoutForm()
+        context = {
+            'form': form
+        }
+        return render(self.request, "ecomm/checkout-page.html", context)
+
+    def post(self, *args, **kwargs):
+        form = CheckoutForm(self.request.POST or None)
+        print(form.is_valid())
+        try:
+            order = Order.objects.get(user=self.request.user, ordered=False)
+            if form.is_valid():
+                street_address = form.cleaned_data.get('street_address')
+                apartment_address = form.cleaned_data.get('apartment_address')
+                country = form.cleaned_data.get('country')
+                zip = form.cleaned_data.get('zip')
+                # same_shipping_address = form.cleaned_data.get('same_shipping_address')
+                # save_info = form.cleaned_data.get('save_info')
+                payment_info = form.cleaned_data.get('payment_info')
+
+                billing_address = BillingAddress(
+                    user=self.request.user,
+                    street_address=street_address,
+                    apartment_address=apartment_address,
+                    country=country,
+                    zip=zip,
+                )
+                billing_address.save()
+                order.billing_address = billing_address
+                order.save()
+                return redirect('ecomm:checkout-page')
+        except ObjectDoesNotExist:
+            messages.error(self.request, "You do not have an active order")
+            return redirect('ecomm:order-summary')
+
+        messages.warning(self.request, "failed to checkout")
+        return redirect('ecomm:checkout-page')
+
 
 def product_view(request):
     return render(request, "ecomm/product-page.html")
 
+
 class ItemDetailVieW(DetailView):
     model = Item
     template_name = "ecomm/product-page.html"
+
 
 @login_required
 def add_to_cart(request, slug):

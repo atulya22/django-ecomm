@@ -1,12 +1,15 @@
-from .views import checkout_view, ItemDetailVieW, HomeView, OrderSummaryView, add_to_cart, remove_from_cart, \
-    remove_single_item_from_cart
+from .views import (ItemDetailVieW, HomeView,
+                    OrderSummaryView, add_to_cart,
+                    remove_from_cart, remove_single_item_from_cart,
+                    CheckoutView)
 
 from django.urls import path
+
 app_name = 'ecomm'
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home-page'),
-    path('checkout/', checkout_view, name='checkout-page'),
+    path('checkout/', CheckoutView.as_view(), name='checkout-page'),
     path('order-summary/', OrderSummaryView.as_view(), name='order-summary'),
     path('product/<slug>/', ItemDetailVieW.as_view(), name='product-page'),
     path('add-to-cart/<slug>/', add_to_cart, name='add-to-cart'),
