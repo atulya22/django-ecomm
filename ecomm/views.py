@@ -1,13 +1,16 @@
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import ListView, DetailView, View
-from .models import  Item, Order, OrderItem
+from .models import  Item, Order, OrderItem, BillingAddress, Payment
 from django.utils import timezone
 from django.contrib import messages
 from .forms import CheckoutForm
-from .models import BillingAddress
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class HomeView(ListView):
@@ -64,13 +67,54 @@ class CheckoutView(View):
                 billing_address.save()
                 order.billing_address = billing_address
                 order.save()
-                return redirect('ecomm:checkout-page')
+                return redirect('ecomm:payment')
         except ObjectDoesNotExist:
             messages.error(self.request, "You do not have an active order")
             return redirect('ecomm:order-summary')
 
         messages.warning(self.request, "failed to checkout")
         return redirect('ecomm:checkout-page')
+
+
+class PaymentView(View):
+    def get(self, *args, **kwargs):
+        return render(self.request, "ecomm/payment.html")
+
+    def post(self, *args, **kwargs):
+        token = self.request.POST.get('stripeToken')
+        print(self.request.POST)
+        order = Order.objects.get(user=self.request.user, ordered=False)
+        amount = int(order.get_total() * 100)
+        try:
+            charge = stripe.Charge.create(
+                api_key=settings.STRIPE_SECRET_KEY,
+                amount=amount,
+                currency="USD",
+                source=token,
+             )
+            payment = Payment()
+            payment.stripe_charge_id = charge['id']
+            payment.user = self.request.user
+            payment.amount = order.get_total()
+            payment.save()
+
+            order.ordered = True
+            order.payment = payment
+            order.save()
+
+            messages.success(self.request, "Your order was successful")
+            return redirect("/")
+        except stripe.error.CardError as e:
+            body = e.json_body
+            err = body.get('error', {})
+            messages.error(self.request, f"{err.get('message')}")
+            return redirect("/")
+        except Exception as e:
+
+            messages.error(self.request, str(e))
+            return redirect("/")
+
+
 
 
 def product_view(request):

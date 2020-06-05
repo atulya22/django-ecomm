@@ -140,3 +140,6 @@ SITE_ID = 1
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_REDIRECT_URL = '/'
+
+STRIPE_SECRET_KEY = 'sk_test_mnOsTyQ9docAoGBoYEvFoDcm00mIvxfSmd'
+STRIPE_PUBLIC_KEY = 'pk_test_CtGgbrtjGwLPocM587Gj63ny00mGIuJ4TS'
