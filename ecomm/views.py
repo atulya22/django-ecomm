@@ -4,10 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import ListView, DetailView, View
-from .models import  Item, Order, OrderItem, BillingAddress, Payment
+from .models import  Item, Order, OrderItem, BillingAddress, Payment, Coupon
 from django.utils import timezone
 from django.contrib import messages
-from .forms import CheckoutForm
+from .forms import CheckoutForm, CouponForm
 import stripe
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -38,10 +38,19 @@ class CheckoutView(View):
 
     def get(self, *args, **kwargs):
         form = CheckoutForm()
-        context = {
-            'form': form
-        }
-        return render(self.request, "ecomm/checkout-page.html", context)
+        try:
+            order = Order.objects.get(user=self.request.user, ordered=False)
+            context = {
+                'form': form,
+                'couponform': CouponForm(),
+                'order': order,
+                'DISPLAY_COUPON_FORM': True
+            }
+            return render(self.request, "ecomm/checkout-page.html", context)
+        except ObjectDoesNotExist:
+            messages.info(self.request, "You do not have an active order")
+            redirect("ecomm:checkout-page.html")
+
 
     def post(self, *args, **kwargs):
         form = CheckoutForm(self.request.POST or None)
@@ -87,9 +96,15 @@ class PaymentView(View):
     def get(self, *args, **kwargs):
         # order info
         order = Order.objects.get(user=self.request.user, ordered=False)
-        context = {
-            'order': order
-        }
+        if order.billing_address:
+            context = {
+                'order': order,
+                'DISPLAY_COUPON_FORM': False
+            }
+        else:
+            messages.warning(self.request, "You have not added a billing address")
+            return redirect("ecomm:order-summary")
+
         return render(self.request, "ecomm/payment.html", context)
 
     def post(self, *args, **kwargs):
@@ -110,6 +125,11 @@ class PaymentView(View):
             payment.amount = order.get_total()
             payment.save()
 
+            order_items = order.items.all()
+            order_items.update(ordered=True)
+            for item in order_items:
+                item.save()
+
             order.ordered = True
             order.payment = payment
             order.save()
@@ -125,7 +145,6 @@ class PaymentView(View):
 
             messages.error(self.request, str(e))
             return redirect("/")
-
 
 
 
@@ -218,4 +237,29 @@ def remove_single_item_from_cart(request, slug):
     else:
         messages.info(request, "You do not have an active order.")
         return redirect("ecomm:product-page", slug=slug)
+
+
+def get_coupon(request, code):
+    try:
+        coupon = Coupon.objects.get(code=code)
+        return coupon
+    except ObjectDoesNotExist:
+        messages.info(request, "This is not a valid coupon")
+
+
+class AddCoupon(View):
+    def post(self, *args, **kwargs):
+        if self.request.method == 'POST':
+            form = CouponForm(self.request.POST or None)
+            if form.is_valid():
+                try:
+                    code = form.cleaned_data.get('code')
+                    order = Order.objects.get(user=self.request.user, ordered=False)
+                    order.coupon = get_coupon(self.request, code)
+                    order.save()
+                    messages.success(request, "Successfully added coupon")
+                    return redirect("ecomm:checkout-page")
+                except ObjectDoesNotExist:
+                    messages.info("You do not have an active order")
+                    return redirect("ecomm:checkout-page")
 

@@ -2,6 +2,7 @@ from .views import (ItemDetailVieW,
                     HomeView,
                     OrderSummaryView,
                     add_to_cart,
+                    AddCoupon,
                     remove_from_cart,
                     remove_single_item_from_cart,
                     CheckoutView,
@@ -23,6 +24,7 @@ urlpatterns = [
     path('remove-from-cart/<slug>/', remove_from_cart, name='remove-from-cart'),
     path('remove-item-from-cart/<slug>/', remove_single_item_from_cart, name='remove-single-item-from-cart'),
     path('payment/<payment_option>/', PaymentView.as_view(), name='payment'),
+    path('add-coupon/', AddCoupon.as_view(), name='add-coupon'),
 
 ]
 
