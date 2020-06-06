@@ -6,7 +6,8 @@ from .views import (ItemDetailVieW,
                     remove_from_cart,
                     remove_single_item_from_cart,
                     CheckoutView,
-                    PaymentView)
+                    PaymentView,
+                    RequestRefundView)
 
 from django.urls import path
 from django.conf import settings
@@ -25,7 +26,7 @@ urlpatterns = [
     path('remove-item-from-cart/<slug>/', remove_single_item_from_cart, name='remove-single-item-from-cart'),
     path('payment/<payment_option>/', PaymentView.as_view(), name='payment'),
     path('add-coupon/', AddCoupon.as_view(), name='add-coupon'),
-
+    path('refund/', RequestRefundView.as_view(), name='refund'),
 ]
 
 if settings.DEBUG:

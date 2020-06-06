@@ -1,0 +1,18 @@
+{% extends "ecomm/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<body>
+  <main>
+    <div class="container">
+        <h2> Request Refund </h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form|crispy}}
+            <button type="submit" class="btn btn-primary"> Submit </button>
+        </form>
+   </div>
+
+  </main>
+</body>
+{% endblock %}
