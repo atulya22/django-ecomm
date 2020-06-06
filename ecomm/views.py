@@ -45,7 +45,6 @@ class CheckoutView(View):
 
     def post(self, *args, **kwargs):
         form = CheckoutForm(self.request.POST or None)
-        print(form.is_valid())
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             if form.is_valid():
@@ -55,7 +54,7 @@ class CheckoutView(View):
                 zip = form.cleaned_data.get('zip')
                 # same_shipping_address = form.cleaned_data.get('same_shipping_address')
                 # save_info = form.cleaned_data.get('save_info')
-                payment_info = form.cleaned_data.get('payment_info')
+                payment_info = form.cleaned_data.get('payment_option')
 
                 billing_address = BillingAddress(
                     user=self.request.user,
@@ -67,7 +66,15 @@ class CheckoutView(View):
                 billing_address.save()
                 order.billing_address = billing_address
                 order.save()
-                return redirect('ecomm:payment')
+
+                if payment_info == 'S':
+                    return redirect('ecomm:payment', payment_option='stripe')
+                elif payment_info == 'P':
+                    return redirect('ecomm:payment', payment_option='paypal')
+                else:
+                    messages.warning(self.request,"Invalid payment option selected")
+                    return redirect('ecomm:checkout-page')
+
         except ObjectDoesNotExist:
             messages.error(self.request, "You do not have an active order")
             return redirect('ecomm:order-summary')
@@ -78,7 +85,12 @@ class CheckoutView(View):
 
 class PaymentView(View):
     def get(self, *args, **kwargs):
-        return render(self.request, "ecomm/payment.html")
+        # order info
+        order = Order.objects.get(user=self.request.user, ordered=False)
+        context = {
+            'order': order
+        }
+        return render(self.request, "ecomm/payment.html", context)
 
     def post(self, *args, **kwargs):
         token = self.request.POST.get('stripeToken')

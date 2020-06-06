@@ -25,6 +25,7 @@ class Item(models.Model):
     label = models.CharField(choices=LABEL_CHOICES, max_length=2, default="P")
     slug = models.SlugField(default="test-product")
     description = models.TextField(default="Test Description")
+    image = models.ImageField(blank=True, null=True)
 
     def get_absolute_url(self):
         print("Absolute Url Called")
@@ -43,8 +44,6 @@ class Item(models.Model):
             'slug': self.slug
         })
 
-
-
     def __str__(self):
         return self.title
 
@@ -54,7 +53,7 @@ class OrderItem(models.Model):
                              on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity =  models.IntegerField(default=1)
+    quantity = models.IntegerField(default=1)
 
     def __str__(self):
         return f"{self.quantity} of {self.item.title}"
