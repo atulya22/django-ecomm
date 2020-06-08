@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Item, OrderItem, Order, Payment, Coupon, Refund
+from .models import Item, OrderItem, Order, Payment, Coupon, Refund, Address
 
 
 def approve_refund(modeladmin, request, queryset):
@@ -8,13 +8,14 @@ def approve_refund(modeladmin, request, queryset):
 
 approve_refund.short_description = 'Approve Requested Refund'
 
+
 # Register your models here.
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['user', 'ordered', 'being_delivered',
                     'received', 'refund_requested', 'refund_granted',
-                    'user', 'billing_address', 'payment', 'coupon']
+                    'user', 'shipping_address', 'billing_address', 'payment', 'coupon']
 
-    list_display_links = ['billing_address', 'payment', 'coupon']
+    list_display_links = ['shipping_address', 'billing_address', 'payment', 'coupon']
 
     list_filter = ['user', 'ordered', 'being_delivered',
                     'received', 'refund_requested', 'refund_granted']
@@ -26,9 +27,25 @@ class OrderAdmin(admin.ModelAdmin):
 
     actions = [approve_refund]
 
+
+class AddressAdmin(admin.ModelAdmin):
+    list_display = [
+        'user',
+        'street_address',
+        'apartment_address',
+        'country',
+        'zip',
+        'type',
+        'default'
+    ]
+
+    list_filter = ['default', 'type', 'country']
+    search_fields = ['user', 'street_address', 'apartment_address', 'zip']
+
 admin.site.register(Item)
 admin.site.register(OrderItem)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Payment)
 admin.site.register(Coupon)
 admin.site.register(Refund)
+admin.site.register(Address, AddressAdmin)
