@@ -39,6 +39,7 @@ class OrderSummaryView(LoginRequiredMixin, View):
             return redirect('/')
         return render(self.request, 'ecomm/order-summary.html', context)
 
+
 def is_valid_form(values):
     valid = True
     for field in values:
@@ -367,7 +368,7 @@ class AddCoupon(View):
                     order = Order.objects.get(user=self.request.user, ordered=False)
                     order.coupon = get_coupon(self.request, code)
                     order.save()
-                    messages.success(request, "Successfully added coupon")
+                    messages.success(self.request, "Successfully added coupon")
                     return redirect("ecomm:checkout-page")
                 except ObjectDoesNotExist:
                     messages.info("You do not have an active order")

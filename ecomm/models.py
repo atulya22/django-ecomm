@@ -9,7 +9,6 @@ CATEGORY_CHOICES = (
     ('OW', 'Outwear')
 )
 
-
 LABEL_CHOICES = (
     ('P', 'primary'),
     ('S', 'secondary'),
