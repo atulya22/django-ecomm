@@ -31,6 +31,9 @@ class Item(models.Model):
     description = models.TextField(default="Test Description")
     image = models.ImageField(blank=True, null=True)
 
+    class Meta:
+        ordering = ['title']
+
     def get_absolute_url(self):
         print("Absolute Url Called")
 
