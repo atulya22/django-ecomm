@@ -23,18 +23,19 @@
 
           <!-- Links -->
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="{% url 'ecomm:home-page'%}">All
+            <li class="nav-item {% if category is None %} active {% endif  %}">
+              <a class="nav-link" href="{% url 'ecomm:home-page' %}">All
                 <span class="sr-only">(current)</span>
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'ecomm:home-page'%}?category=S">Shirts</a>
+            <li class="nav-item {% if category == 'S' %} active {% endif  %}">
+              <a class="nav-link" href="{% url 'ecomm:home-page' %}?category=S">Shirts
+              </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item {% if category == 'SW' %} active {% endif  %}">
               <a class="nav-link" href="{% url 'ecomm:home-page'%}?category=SW">Sport wears</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item {% if category == 'OW' %} active {% endif  %}">
               <a class="nav-link" href="{% url 'ecomm:home-page'%}?category=OW">Outwears</a>
             </li>
 

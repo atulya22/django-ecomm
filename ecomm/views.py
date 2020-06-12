@@ -22,6 +22,8 @@ def create_ref_code():
 class HomeView(ListView):
     paginate_by = 10
 
+    print("HomeView Called ")
+
     def get(self, request, *args, **kwargs):
         category = request.GET.get('category')
         try:
@@ -31,7 +33,8 @@ class HomeView(ListView):
                 items = Item.objects.all()
 
             context = {
-                'items': items
+                'items': items,
+                'category': category
             }
         except ObjectDoesNotExist:
             messages.error(self.request, "Unable to retrieve products")
@@ -39,9 +42,8 @@ class HomeView(ListView):
 
         return render(self.request, 'ecomm/home-page.html', context)
 
-    def get_queryset(self):
-        print("Over Riding get_queryset")
-
+    def get_context_data(self, *, object_list=None, **kwargs):
+        print("Get context data called")
 
 class OrderSummaryView(LoginRequiredMixin, View):
 
