@@ -45,6 +45,7 @@ class HomeView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         print("Get context data called")
 
+
 class OrderSummaryView(LoginRequiredMixin, View):
 
     def get(self, *args, **kwargs):
@@ -278,15 +279,20 @@ class PaymentView(View):
             return redirect("/")
 
 
-def product_view(request):
-    return render(request, "ecomm/product-page.html")
-
-
 class ItemDetailVieW(DetailView):
-    print("Item View Being Called")
-    model = Item
     template_name = "ecomm/product-page.html"
+    model = Item
 
+    def get(self, request, *args, **kwargs):
+        print(kwargs)
+        model = self.get_object()
+        similar_products = Item.objects.filter(category=model.category).exclude(id=model.id)[:3]
+        print(type(similar_products))
+        context = {
+            'object': model,
+            'similar_products': similar_products
+        }
+        return render(self.request, "ecomm/product-page.html", context)
 
 @login_required
 def add_to_cart(request, slug):
