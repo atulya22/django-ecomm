@@ -20,10 +20,27 @@ def create_ref_code():
 
 
 class HomeView(ListView):
-    model = Item
-    template_name = 'ecomm/home-page.html'
     paginate_by = 10
-    context_object_name = "items"
+
+    def get(self, request, *args, **kwargs):
+        category = request.GET.get('category')
+        try:
+            if category:
+                items = Item.objects.filter(category=category)
+            else:
+                items = Item.objects.all()
+
+            context = {
+                'items': items
+            }
+        except ObjectDoesNotExist:
+            messages.error(self.request, "Unable to retrieve products")
+            return redirect('/')
+
+        return render(self.request, 'ecomm/home-page.html', context)
+
+    def get_queryset(self):
+        print("Over Riding get_queryset")
 
 
 class OrderSummaryView(LoginRequiredMixin, View):
@@ -264,6 +281,7 @@ def product_view(request):
 
 
 class ItemDetailVieW(DetailView):
+    print("Item View Being Called")
     model = Item
     template_name = "ecomm/product-page.html"
 
@@ -359,6 +377,8 @@ def get_coupon(request, code):
 
 
 class AddCoupon(View):
+    print("Add Coupon View Being Called")
+
     def post(self, *args, **kwargs):
         if self.request.method == 'POST':
             form = CouponForm(self.request.POST or None)
