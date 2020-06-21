@@ -83,7 +83,7 @@ class CheckoutView(View):
             }
             shipping_address_qs = Address.objects.filter(
                 user=self.request.user,
-                type='S',
+                address_type='S',
                 default=True
             )
 
@@ -92,7 +92,7 @@ class CheckoutView(View):
 
             billing_address_qs = Address.objects.filter(
                 user=self.request.user,
-                type='B',
+                address_type='B',
                 default=True
             )
 
@@ -115,7 +115,7 @@ class CheckoutView(View):
                     print("Using default shipping address")
                     address_qs = Address.objects.filter(
                         user=self.request.user,
-                        type='S',
+                        address_type='S',
                         default=True
                     )
                     if address_qs.exists():
@@ -141,7 +141,7 @@ class CheckoutView(View):
                             apartment_address=shipping_address2,
                             country=shipping_country,
                             zip=shipping_zip,
-                            type='S'
+                            address_type='S'
                         )
                         shipping_address.save()
                         order.shipping_address = shipping_address
@@ -170,7 +170,7 @@ class CheckoutView(View):
                     print("Using default shipping address")
                     address_qs = Address.objects.filter(
                         user=self.request.user,
-                        type='B',
+                        address_type='B',
                         default=True
                     )
                     if address_qs.exists():
@@ -193,7 +193,7 @@ class CheckoutView(View):
                             apartment_address=billing_address2,
                             country=billing_country,
                             zip=billing_zip,
-                            type='B'
+                            address_type='B'
                         )
                         billing_address.save()
                         order.billing_address = billing_address
@@ -287,12 +287,12 @@ class ItemDetailVieW(DetailView):
         print(kwargs)
         model = self.get_object()
         similar_products = Item.objects.filter(category=model.category).exclude(id=model.id)[:3]
-        print(type(similar_products))
         context = {
             'object': model,
             'similar_products': similar_products
         }
         return render(self.request, "ecomm/product-page.html", context)
+
 
 @login_required
 def add_to_cart(request, slug):
@@ -320,6 +320,18 @@ def add_to_cart(request, slug):
         order.items.add(order_item)
 
     return redirect("ecomm:order-summary")
+
+
+class RemoveFromCart(View):
+
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def delete(self, request, *args, **kwargs):
+        print("Delete Called")
+        return redirect("ecomm:order-summary")
+
+
+
 
 
 @login_required
@@ -363,7 +375,6 @@ def remove_single_item_from_cart(request, slug):
                 order_item.quantity -= 1
                 order_item.save()
             else:
-                print(f"Type: {type(order.items)}")
                 order.items.remove(order_item)
 
             messages.info(request, "This item quantity was updated.")
