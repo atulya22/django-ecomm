@@ -6,6 +6,8 @@
 
 A ecommerce website built using the Django framework 
 
+<a href="https://tuly-microblog.herokuapp.com/"> Launch Demo Website </a>
+
 <h2> Technologies </h2>
 
 * Django web framework
