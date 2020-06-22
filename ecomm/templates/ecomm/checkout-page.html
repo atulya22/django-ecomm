@@ -66,11 +66,11 @@
                 <label class="custom-control-label" for="set_default_shipping">Save as default shipping address</label>
               </div>
             </div>
-              {% if default_shipping_address%}
+              {% if default_shipping_address %}
               <div class="custom-control custom-checkbox">
                 <input type="checkbox" class="custom-control-input" name="use_default_shipping" id="use_default_shipping">
                 <label class="custom-control-label" for="use_default_shipping">
-                  Use default shipping address: {{ default_shipping_address.address|truncatechars:10 }}
+                  Use default shipping address: {{ default_shipping_address.street_address|truncatechars:40 }}
                 </label>
               </div>
               {% endif %}
@@ -124,7 +124,7 @@
           <div class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" name="use_default_billing" id="use_default_billing">
             <label class="custom-control-label" for="use_default_billing">
-              Use default billing address: {{ default_billing_address.address|truncatechars:10 }}
+              Use default billing address: {{ default_billing_address.street_address|truncatechars:40 }}
             </label>
            </div>
          <hr>

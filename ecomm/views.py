@@ -118,7 +118,10 @@ class CheckoutView(View):
                         address_type='S',
                         default=True
                     )
+                    
                     if address_qs.exists():
+                        print("Shipping address")
+                        print(address_qs[0].street_address)
                         shipping_address = address_qs[0]
                         order.shipping_address = shipping_address
                         order.save()
@@ -134,7 +137,8 @@ class CheckoutView(View):
                     shipping_zip = form.cleaned_data.get('shipping_zip')
                     # same_shipping_address = form.cleaned_data.get('same_shipping_address')
                     # save_info = form.cleaned_data.get('save_info')
-                    if is_valid_form([shipping_address1, shipping_address2, shipping_zip]):
+                    print()
+                    if is_valid_form([shipping_address1, shipping_country, shipping_zip]):
                         shipping_address = Address(
                             user=self.request.user,
                             street_address=shipping_address1,
@@ -153,8 +157,10 @@ class CheckoutView(View):
 
                     else:
                         messages.info(self.request, "Please fill in the required shipping address field")
+                        return redirect('ecomm:checkout-page')
 
-                use_default_billing = form.cleaned_data.get('use_default_shipping')
+
+                use_default_billing = form.cleaned_data.get('use_default_billing')
                 same_billing_address = form.cleaned_data.get('same_billing_address')
 
                 if same_billing_address:
@@ -186,7 +192,8 @@ class CheckoutView(View):
                     billing_address2 = form.cleaned_data.get('billing_address2')
                     billing_country = form.cleaned_data.get('billing_country')
                     billing_zip = form.cleaned_data.get('billing_zip')
-                    if is_valid_form([billing_address1, billing_address2, billing_zip]):
+                    print(is_valid_form([billing_address1, billing_address2, billing_zip]))
+                    if is_valid_form([billing_address1, billing_country, billing_zip]):
                         billing_address = Address(
                             user=self.request.user,
                             street_address=billing_address1,
@@ -204,6 +211,7 @@ class CheckoutView(View):
                             billing_address.save()
                     else:
                         messages.info(self.request, "Please fill in the required billing address field")
+                        return redirect('ecomm:checkout-page')
 
                 payment_info = form.cleaned_data.get('payment_option')
 
