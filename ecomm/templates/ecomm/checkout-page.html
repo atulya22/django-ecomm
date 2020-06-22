@@ -121,12 +121,15 @@
                 <label class="custom-control-label" for="set_default_billing">Save as default billing address</label>
               </div>
           </div>
+          <div class="hideable-use-default-billing">
           <div class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" name="use_default_billing" id="use_default_billing">
             <label class="custom-control-label" for="use_default_billing">
               Use default billing address: {{ default_billing_address.street_address|truncatechars:40 }}
             </label>
            </div>
+          </div>
+ 
          <hr>
           <h3> Payment Option </h3>
 
@@ -233,11 +236,14 @@
 <script>
 var hideable_shipping_form = $('.hideable_shipping_form')
 var hideable_billing_form = $('.hideable_billing_form')
-console.log("Printing")
-console.log(hideable_shipping_form)
+var use_default_billing_box = $('.hideable-use-default-billing')
+
 
 var use_default_shipping = document.querySelector('input[name=use_default_shipping')
 var use_default_billing = document.querySelector('input[name=use_default_billing')
+
+var use_same_billing = document.querySelector('input[name=same_billing_address')
+
 
 use_default_shipping.addEventListener('change', function() {
   if (this.checked) {
@@ -254,5 +260,18 @@ use_default_billing.addEventListener('change', function() {
     hideable_billing_form.show()
   }
  })
+
+ use_same_billing.addEventListener('change', function() {
+  if (this.checked) {
+    hideable_billing_form.hide()
+    use_default_billing_box.hide()
+
+  } else {
+    hideable_billing_form.show()
+    use_default_billing_box.show()
+
+  }
+ })
+
 </script>
 {% endblock extra_scripts %}
